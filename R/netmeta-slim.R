@@ -6,10 +6,13 @@
 #' \email{guido.schwarzer@@uniklinik-freiburg.de}) employs a graph-theoretical
 #' approach to network meta-analysis, which is equivalent to the Frequentist 
 #' approach based on weighted least squares regression. This slimmed version
-#' of the function is focused on efficiently estimating the relative treatment 
-#' effect estimates and their standard errors for both a fixed effects and 
-#' random effects model.
-#
+#' of the function was copied from the netmeta package and modified to focus 
+#' on efficiently estimating the relative treatment effect estimates and their 
+#' standard errors for both a fixed effects and random effects model.
+#' 
+#' Source: https://github.com/guido-s/netmeta/blob/develop/R/netmeta.R
+#' License: GPL (>=2)
+#'
 #' @param TE  Vector containing study-level estimated treatment effects
 #' @param seTE  Vector containing standard errors of study-level treatment effects
 #' @param treat1  Vector indicating the label/number corresponding to the first
@@ -70,6 +73,7 @@
 #'    matrices containing the estimated standard errors for these estimates.
 #' ----------------------------------------------------------------------------
 
+
 netmeta_slim <- function (TE, seTE, treat1, treat2, studlab, data = NULL, 
                           subset = NULL, correlated, sm, 
                           reference.group, baseline.reference = TRUE, 
@@ -82,6 +86,7 @@ netmeta_slim <- function (TE, seTE, treat1, treat2, studlab, data = NULL,
                           mean2 = NULL, sd1 = NULL, sd2 = NULL, 
                           time1 = NULL, time2 = NULL, warn = TRUE) 
 {
+
   missing.reference.group <- missing(reference.group)
   baseline.reference <- replaceNULL(baseline.reference, TRUE)
   chklogical(baseline.reference)
@@ -559,7 +564,9 @@ netmeta_slim <- function (TE, seTE, treat1, treat2, studlab, data = NULL,
 
 
 #
-# modified version of auxiliary function nma_ruecker
+# Modified version of auxiliary function nma_ruecker from netmeta
+#
+# Source: https://github.com/guido-s/netmeta/blob/develop/R/nma.ruecker.R
 #
 nma_ruecker_slim <- function(TE, W, seTE,
                              treat1, treat2,

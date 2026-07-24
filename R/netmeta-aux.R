@@ -8,9 +8,10 @@
 # License: GPL (>= 2)
 # ----------------------------------------------------------------------------
 
+#' @import Matrix
+
 prepare <- function(TE, seTE, treat1, treat2, studlab, tau = 0,
                     correlated = FALSE, func.inverse) {
-  library(Matrix)
   if (is.na(tau))
     tau <- 0
   

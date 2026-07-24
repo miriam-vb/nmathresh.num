@@ -20,19 +20,20 @@
 #'    estimates
 #' @param preset  Numeric value determining whether a specific preset 
 #'    decision_function should be implemented rather than a user-supplied function
-#' @param parallel  Boolean determining whether to parallelize the threshold 
-#'    convergence method using all available cores (as opposed to sequential 
-#'    evaluation)
+#' @param future_plan  Function call of future::plan that specifies how futures 
+#'    are to be resolved. Defaults to sequential evaluation with one worker
 #'
 #' @return  List containing thresh.df, a data frame of thresholds and new 
 #'    recommended treatments with columns \code{- Bias Thresh}, \code{- New Rec}, 
 #'    \code{+ Bias Thresh}, and \code{+ New Rec}, best, the vector of optimal 
 #'    treatments recommended by the decision function before bias adjustment,
 #'    and args, a list of the arguments defined in the original function call
+#'    
+#' @import doFuture
 #' ----------------------------------------------------------------------------
 
 bias_thresh_1D <- function(data, decision_function = NULL, indices, admin = 10, 
-                        tol = 10**(-3), preset = 1, parallel = FALSE) {
+                        tol = 10**(-3), preset = 1, future_plan = plan(sequential)) {
   
   # set decision_function to frequentist threshold analysis using the 
   # projection matrix with max efficacy as default
@@ -185,24 +186,18 @@ bias_thresh_1D <- function(data, decision_function = NULL, indices, admin = 10,
   }
   
   # allow for parallelization of boundary convergence method
-  if (parallel) {
-    library(doFuture)
-    plan(multisession)
-    thresh <- foreach(ind = indices, .options.future = 
-                        list(seed = TRUE)) %dofuture% {
-      thresh_conv(ind)
-    }
-    # reform the data.frame using futures
-    thresh.df <- t(as.data.frame(thresh))
-    rownames(thresh.df) <- NULL
-    thresh.df <- as.data.frame(thresh.df)
-  } else {
-    for (ind in indices) {
-      row <- thresh_conv(ind)
-      thresh.df <- rbind(thresh.df, row)
-    }
+  future_plan
+  thresh <- foreach(ind = indices, .options.future = 
+                    list(seed = TRUE, package = structure(TRUE, 
+                    add = c("nmathresh.num")))) %dofuture% {
+    thresh_conv(ind)
   }
+  # reform the data.frame using futures
+  thresh.df <- t(as.data.frame(thresh))
+  rownames(thresh.df) <- NULL
+  thresh.df <- as.data.frame(thresh.df)
   
+
   # convert bias columns to numeric
   thresh.df[, c(1,3)] <- apply(thresh.df[, c(1,3)], 2, 
                                function(x) as.numeric(as.character(x)))
@@ -214,7 +209,7 @@ bias_thresh_1D <- function(data, decision_function = NULL, indices, admin = 10,
   return(list(thresh.df = thresh.df, best = best, 
               args = list(data = data, decision_function = decision_function, 
                           indices = indices, admin = admin, tol = tol, 
-                          preset = preset, parallel = parallel)))
+                          preset = preset, future_plan = future_plan)))
 }
 
 

@@ -29,19 +29,23 @@
 #'    a plot of the invariant region
 #' @param preset  Numeric value determining whether a specific preset 
 #'    decision_function should be implemented rather than a user-supplied function
-#' @param parallel  Boolean determining whether to parallelize the threshold 
-#'    convergence method using all available cores (as opposed to sequential 
-#'    evaluation)
+#' @param future_plan  Function call of future::plan that specifies how futures 
+#'    are to be resolved. Defaults to sequential evaluation with one worker.
 #'
 #' @return  List containing thresh.df, a data frame of thresholds and new 
 #'    recommended treatments with columns \code{Bias_Ind_1}, \code{Bias_Ind_2}, 
-#'    and \code{New_Rec}, and args, a list of the arguments defined in the 
-#'    original function call
+#'    and \code{New_Rec}, best, the vector of optimal treatments recommended by 
+#'    the decision function before bias adjustment, and args, a list of the 
+#'    arguments defined in the original function call
+#'    
+#' @import doFuture
+#' @importFrom DescTools PolToCart
+#' @importFrom DescTools CartToPol
 #' ----------------------------------------------------------------------------
 
-bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 5, 
-                          tol = 10**(-3), rad_jump = pi/90, dist_tol = 0.5, 
-                          plot = TRUE, preset = 1, parallel = FALSE){
+bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 10, 
+                           tol = 10**(-3), rad_jump = pi/90, dist_tol = 0.5, 
+                           plot = TRUE, preset = 1, future_plan = plan(sequential)){
   
   # set decision_function to frequentist threshold analysis using the 
   # projection matrix with max efficacy as default
@@ -92,19 +96,23 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 5,
     return(sqrt(sum((vec1 - vec2)**2)))
   }
   
-  library(DescTools)
-  
   # implement random 2D bias adjustment at each selected data point and use
   # IVT and interval bisection method to compute thresholds
-  library(doFuture)
-  n_cores <- availableCores()
+  if (is.null(future_plan)) {
+    plan(sequential)
+    n_workers <- nbrOfWorkers()
+  } else {
+    future_plan
+    n_workers <- nbrOfWorkers()
+  }
+
   
   # define function for implementing threshold convergence
-  thresh_conv <- function(core, n_cores) {
+  thresh_conv <- function(core, n_workers) {
     thresh.df <- data.frame(matrix(ncol=4,nrow=0))
-    theta <- 2*pi*(core-1)/n_cores
+    theta <- 2*pi*(core-1)/n_workers
     grain <- 0
-    while (theta <= 2*pi*(core/n_cores)) {
+    while (theta <= 2*pi*(core/n_workers)) {
       if (nrow(thresh.df) == 0 || tail(thresh.df,1)[,3] == 'Admin') {
         b1 <- admin/2
       } else {
@@ -208,7 +216,7 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 5,
         }
       }
       # if the last point has met dist_tol with the endpoint, cease iteration
-      if (theta == 2*pi*(core/n_cores)) {
+      if (theta == 2*pi*(core/n_workers)) {
         break
       }
       
@@ -222,21 +230,21 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 5,
       grain <- 0
       
       # cap evaluation of dist_tol at end point
-      if (theta >= 2*pi*(core/n_cores)) {
-        theta <- 2*pi*(core/n_cores)
+      if (theta >= 2*pi*(core/n_workers)) {
+        theta <- 2*pi*(core/n_workers)
       }
     }
     colnames(thresh.df) <- c("Bias_Ind_1", "Bias_Ind_2", "New_Rec","Theta")
     return(thresh.df) 
   }
   
-  # allow for parallelized option
-  if (parallel) {
-    plan(multisession)
-    thresh <- foreach(core = 1:n_cores, .options.future = 
+  # evaluate thresholds within the plane of bias in sections as specified
+  # by plan 
+  if (n_workers > 1) {
+    thresh <- foreach(core = 1:n_workers, .options.future = 
                         list(seed = TRUE)) %dofuture% {
-                          thresh_conv(core, n_cores)
-                        }
+                           thresh_conv(core, n_workers)
+    } %packages% "nmathresh.num"
     # reform the data.frame using futures
     thresh.df <- Reduce(function(x, y) merge(x, y, all=TRUE), thresh)
     rownames(thresh.df) <- NULL
@@ -245,7 +253,8 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 5,
     # evaluate once sequentially
     thresh.df <- thresh_conv(1, 1)  
   }
-  
+ 
+
   # sort and convert bias columns to numeric data type
   thresh.df[, c(1,2,4)] <- apply(thresh.df[, c(1,2,4)], 2, 
                                  function(x) as.numeric(as.character(x)))
@@ -255,11 +264,12 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 5,
   
   # return bias values and index of treatment that became superior at each switch 
   # (or that it was admin cutoff, indicating a potential invariant region)
-  thresh_obj <- list(thresh.df = thresh.df, args = list(data = data, 
-                   decision_function = decision_function, ind1 = ind1, 
-                   ind2 = ind2, admin = admin, tol = tol, rad_jump = rad_jump, 
-                   dist_tol = dist_tol, plot = plot, preset = preset, 
-                   parallel = parallel))
+  thresh_obj <- list(thresh.df = thresh.df, best = best,
+                     args = list(data = data, decision_function = decision_function, 
+                                 ind1 = ind1, ind2 = ind2, admin = admin, 
+                                 tol = tol, rad_jump = rad_jump, 
+                                 dist_tol = dist_tol, plot = plot, 
+                                 preset = preset, future_plan = future_plan))
   
   if (plot == TRUE) {
     # print out a graph of the boundary points of the region
@@ -289,12 +299,11 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 5,
 #'    Defaults to NULL, in which case the label is automatically generated to
 #'    report the set of indices (ind2) to which the second bias adjustment was 
 #'    applied.
+#'    
+#' @import ggplot2 ggforce
 #' ----------------------------------------------------------------------------
 
 print_thresh_2D <- function(thresh_obj, labX = NULL, labY = NULL){
-  # load packages
-  library(ggplot2)
-  library(ggforce)
   
   # import arguments from bias_thresh_2D call
   thresh.df <- thresh_obj$thresh.df
@@ -305,11 +314,11 @@ print_thresh_2D <- function(thresh_obj, labX = NULL, labY = NULL){
   # define labels for sets or individual indices of bias adjustment
   if (is.null(labX)) {
     labX <- paste0("Bias (", ifelse(length(ind1) > 1, "Indices ", "Index "), 
-                    paste0(ind1, collapse = ", "), ")")
+                   paste0(ind1, collapse = ", "), ")")
   }
   if (is.null(labY)) {
     labY <- paste0("Bias (", ifelse(length(ind2) > 1, "Indices ", "Index "), 
-                    paste0(ind2, collapse = ", "), ")")
+                   paste0(ind2, collapse = ", "), ")")
   }
   
   plt <- ggplot(data = thresh.df, aes(x = Bias_Ind_1, y = Bias_Ind_2)) +
