@@ -1,12 +1,14 @@
-# ----------------------------------------------------------------------------
-# Auxiliary functions and classes to support netmeta_slim
-#
-# Package: netmeta
-# Authors: Gerta Rücker <gerta.ruecker@@uniklinik-freiburg.de>, 
-#          Guido Schwarzer <guido.schwarzer@uniklinik-freiburg.de>
-# Source:  https://github.com/guido-s/netmeta
-# License: GPL (>= 2)
-# ----------------------------------------------------------------------------
+#' ----------------------------------------------------------------------------
+#' Auxiliary functions and classes to support netmeta_slim
+#'
+#' Package: netmeta
+#' Authors: Gerta Rücker <gerta.ruecker@@uniklinik-freiburg.de>, 
+#'          Guido Schwarzer <guido.schwarzer@uniklinik-freiburg.de>
+#' Source:  https://github.com/guido-s/netmeta
+#' License: GPL (>= 2)
+#' 
+#' @export
+#' ----------------------------------------------------------------------------
 
 #' @import Matrix
 

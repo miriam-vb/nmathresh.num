@@ -30,6 +30,8 @@
 #'    and args, a list of the arguments defined in the original function call
 #'    
 #' @import doFuture
+#' 
+#' @export 
 #' ----------------------------------------------------------------------------
 
 bias_thresh_1D <- function(data, decision_function = NULL, indices, admin = 10, 

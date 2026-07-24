@@ -76,9 +76,10 @@
 #' @return Displays the forest plot on the current plot device (if \code{display
 #'   = TRUE}). Also returns invisibly the underlying \code{gtable} object, which
 #'   can be further manipulated.
-#' @export
 #'
 #' @import gtable grid gridExtra grDevices
+#' 
+#' @export
 #' ----------------------------------------------------------------------------
 
 thresh_forest.num <- function(thresh_obj,

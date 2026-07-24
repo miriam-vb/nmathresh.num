@@ -41,6 +41,8 @@
 #' @import doFuture
 #' @importFrom DescTools PolToCart
 #' @importFrom DescTools CartToPol
+#' 
+#' @export
 #' ----------------------------------------------------------------------------
 
 bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 10, 

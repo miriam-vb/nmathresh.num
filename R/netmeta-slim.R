@@ -71,6 +71,8 @@
 #'    estimated overall treatment effects from the common/random effects model, 
 #'    respectively, along with seTE.common and seTE.random, \eqn{n \times n} 
 #'    matrices containing the estimated standard errors for these estimates.
+#'    
+#' @export
 #' ----------------------------------------------------------------------------
 
 
