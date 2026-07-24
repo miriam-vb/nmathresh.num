@@ -1,10 +1,24 @@
 Package: nmathresh.num
-Title: What the Package Does (One Line, Title Case)
+Title: Numerical Bias Adjustment Threshold Finding
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    person("Miriam", "Van Bergeyk", , "mvanberg@uwaterloo.ca", role = c("aut", "cre"))
+Description: This package introduces general computational methods for one- or two-
+    dimensional threshold analysis at any level of the data hierarchy (contrast,
+    study or arm level) which accommodate arbitrary decision functions. This is 
+    accomplished through iterative modification of the data and reassessment of the
+    decision function until the boundary at which the decision changes is identified.
+    An interval bisection search method is implemented for increased efficiency.
 License: GPL (>= 3)
 Encoding: UTF-8
+Imports:
+    Matrix,
+    gtable,
+    grid,
+    gridExtra,
+    ggplot2,
+    ggforce,
+    doFuture
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
+URL: https://github.com/miriam-vb/nmathresh.num
