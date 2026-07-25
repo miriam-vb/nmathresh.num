@@ -1,4 +1,3 @@
-#' ----------------------------------------------------------------------------
 #' Auxiliary functions and classes to support netmeta_slim
 #'
 #' Package: netmeta
@@ -7,10 +6,11 @@
 #' Source:  https://github.com/guido-s/netmeta
 #' License: GPL (>= 2)
 #' 
-#' @export
-#' ----------------------------------------------------------------------------
-
 #' @import Matrix
+#' @import MASS
+#' 
+#' @export
+
 
 prepare <- function(TE, seTE, treat1, treat2, studlab, tau = 0,
                     correlated = FALSE, func.inverse) {
@@ -659,8 +659,7 @@ chkmultiarm <- function(TE, seTE, treat1, treat2, studlab, correlated,
                         tol.multiarm = 0.001,
                         tol.multiarm.se = NULL,
                         details = FALSE, debug = FALSE) {
-  
-  require(MASS)
+
   #
   # Ordering dataset (if necessary)
   #
@@ -1079,6 +1078,9 @@ chkmultiarm <- function(TE, seTE, treat1, treat2, studlab, correlated,
   invisible(NULL)
 }
 
+#' @rdname netconnection
+#' @method netconnection default
+#' @export
 
 netconnection.default <- function(data = NULL, treat1, treat2, studlab = NULL,
                                   subset = NULL,
@@ -1672,6 +1674,10 @@ print.netconnection <- function(x,
 netconnection <- function(data, ...)
   UseMethod("netconnection")
 
+
+#' @rdname netdistance
+#' @method netdistance default
+#' @export
 
 netdistance.default <- function(x, ...) {
   

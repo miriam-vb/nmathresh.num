@@ -1,4 +1,3 @@
-#' ----------------------------------------------------------------------------
 #' Interval Bisection Sampling of Bias Thresholds (2D)
 #' 
 #' This function uses interval bisection to approximate decision-invariant
@@ -43,7 +42,7 @@
 #' @importFrom DescTools CartToPol
 #' 
 #' @export
-#' ----------------------------------------------------------------------------
+
 
 bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 10, 
                            tol = 10**(-3), rad_jump = pi/90, dist_tol = 0.5, 
@@ -282,7 +281,6 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 10,
 }
 
 
-#' ----------------------------------------------------------------------------
 #' Visualization of Bias Thresholds (2D)
 #' 
 #' This function allows for repeated plotting of the decision-invariant bias 
@@ -303,7 +301,7 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 10,
 #'    applied.
 #'    
 #' @import ggplot2 ggforce
-#' ----------------------------------------------------------------------------
+
 
 print_thresh_2D <- function(thresh_obj, labX = NULL, labY = NULL){
   

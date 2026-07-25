@@ -1,4 +1,3 @@
-#' ----------------------------------------------------------------------------
 #' Producing threshold forest plots
 #'
 #' This function produces threshold forest plots overlaying the
@@ -80,7 +79,7 @@
 #' @import gtable grid gridExtra grDevices
 #' 
 #' @export
-#' ----------------------------------------------------------------------------
+
 
 thresh_forest.num <- function(thresh_obj,
                           y, CI.lo, CI.hi, label, orderby = NULL, data = NULL,

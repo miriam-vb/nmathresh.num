@@ -1,4 +1,3 @@
-#' ----------------------------------------------------------------------------
 #' Network meta-analysis using a graph-theoretical estimation method
 #' 
 #' The netmeta function from the netmeta package (authors Gerta Rücker 
@@ -71,9 +70,10 @@
 #'    estimated overall treatment effects from the common/random effects model, 
 #'    respectively, along with seTE.common and seTE.random, \eqn{n \times n} 
 #'    matrices containing the estimated standard errors for these estimates.
-#'    
+#'   
+#' @import MASS
+#'
 #' @export
-#' ----------------------------------------------------------------------------
 
 
 netmeta_slim <- function (TE, seTE, treat1, treat2, studlab, data = NULL, 
@@ -579,8 +579,7 @@ nma_ruecker_slim <- function(TE, W, seTE,
                              method.tau = "DL",
                              func.inverse,
                              Cov0) {
-  
-  require(MASS)
+
   w.pooled <- 1 / seTE^2
   
   m <- length(TE)                        # Number of pairwise comparisons (edges)

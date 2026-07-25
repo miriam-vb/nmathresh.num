@@ -1,4 +1,3 @@
-#' ----------------------------------------------------------------------------
 #' Interval Bisection Sampling of Bias Thresholds (1D)
 #' 
 #' This function uses interval bisection to approximate decision-invariant
@@ -32,7 +31,7 @@
 #' @import doFuture
 #' 
 #' @export 
-#' ----------------------------------------------------------------------------
+
 
 bias_thresh_1D <- function(data, decision_function = NULL, indices, admin = 10, 
                         tol = 10**(-3), preset = 1, future_plan = plan(sequential)) {
