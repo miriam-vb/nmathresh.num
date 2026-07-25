@@ -301,6 +301,8 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 10,
 #'    applied.
 #'    
 #' @import ggplot2 ggforce
+#' 
+#' @export
 
 
 print_thresh_2D <- function(thresh_obj, labX = NULL, labY = NULL){
