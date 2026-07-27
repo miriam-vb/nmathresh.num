@@ -46,7 +46,7 @@
 
 bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 10, 
                            tol = 10**(-3), rad_jump = pi/90, dist_tol = 0.5, 
-                           plot = TRUE, preset = 1, future_plan = plan(sequential)){
+                           plot = TRUE, preset = 1, future_plan = plan("sequential")){
   
   # set decision_function to frequentist threshold analysis using the 
   # projection matrix with max efficacy as default
@@ -100,14 +100,14 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 10,
   # implement random 2D bias adjustment at each selected data point and use
   # IVT and interval bisection method to compute thresholds
   if (is.null(future_plan)) {
-    plan(sequential)
+    with(plan("sequential"), local = TRUE)
     n_workers <- nbrOfWorkers()
   } else {
-    future_plan
+    with(future_plan, local = TRUE)
     n_workers <- nbrOfWorkers()
   }
 
-  
+
   # define function for implementing threshold convergence
   thresh_conv <- function(core, n_workers) {
     thresh.df <- data.frame(matrix(ncol=4,nrow=0))

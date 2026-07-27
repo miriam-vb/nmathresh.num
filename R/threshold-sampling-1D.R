@@ -36,7 +36,7 @@
 
 
 bias_thresh_1D <- function(data, decision_function = NULL, indices, admin = 10, 
-                        tol = 10**(-3), preset = 1, future_plan = plan(sequential)) {
+                        tol = 10**(-3), preset = 1, future_plan = plan("sequential")) {
   
   # set decision_function to frequentist threshold analysis using the 
   # projection matrix with max efficacy as default
@@ -189,7 +189,11 @@ bias_thresh_1D <- function(data, decision_function = NULL, indices, admin = 10,
   }
   
   # allow for parallelization of boundary convergence method
-  future_plan
+  if (is.null(future_plan)) {
+    with(plan("sequential"), local = TRUE)
+  } else {
+    with(future_plan, local = TRUE)
+  }
   thresh <- foreach(ind = indices, .options.future = 
                     list(seed = TRUE, package = structure(TRUE, 
                     add = c("nmathresh.num")))) %dofuture% {
