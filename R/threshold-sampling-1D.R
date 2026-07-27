@@ -29,6 +29,7 @@
 #'    and args, a list of the arguments defined in the original function call
 #'    
 #' @import doFuture
+#' @importFrom future plan
 #' 
 #' @export 
 

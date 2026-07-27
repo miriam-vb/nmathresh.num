@@ -11,12 +11,10 @@
 #' @param decision_function  Function accepting NMA data and bias adjustment
 #'    used to implement the decision rule at each step of the boundary finding 
 #'    method
-#' @param ind1  Numerical vector indicating the indices of the sequential list
-#'    of data points for which the first generic bias adjustment should be 
-#'    applied
-#' @param ind2  Numerical vector indicating the indices of the sequential list
-#'    of data points for which the second generic bias adjustment should be 
-#'    applied
+#' @param ind1  Integer indicating the index of the sequential list of data
+#'    points to which the first generic bias adjustment should be applied
+#' @param ind2  Integer indicating the index of the sequential list of data 
+#'    points for which the second generic bias adjustment should be applied
 #' @param admin  Administrative cutoff value for bias adjustment beyond which 
 #'    decision invariance will not be assessed
 #' @param tol  Tolerance for the absolute difference between converging boundary
@@ -38,6 +36,7 @@
 #'    arguments defined in the original function call
 #'    
 #' @import doFuture
+#' @importFrom future plan
 #' @importFrom DescTools PolToCart
 #' @importFrom DescTools CartToPol
 #' 
@@ -126,20 +125,12 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 10,
       best0 <- best
       
       bvec <- rep(0,n)
-      for (i in ind1) {
-        bvec[i] <- PolToCart(b1,theta)$x
-      }
-      for (i in ind2) {
-        bvec[i] <- PolToCart(b1,theta)$y
-      }
+      bvec[ind1] <- PolToCart(b1,theta)$x
+      bvec[ind2] <- PolToCart(b1,theta)$y
       best1 <- decision_function(data, bias = bvec)
       
-      for (i in ind1) {
-        bvec[i] <- PolToCart(admin,theta)$x
-      }
-      for (i in ind2) {
-        bvec[i] <- PolToCart(admin,theta)$y
-      }
+      bvec[ind1] <- PolToCart(b2,theta)$x
+      bvec[ind2] <- PolToCart(b2,theta)$y
       best2 <- decision_function(data, bias = bvec)
       
       if (setequal(best2, best)) {
@@ -178,28 +169,16 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 10,
             b2 <- max
           }
           # update treatment recommendations for each point of bias
-          for (i in ind1) {
-            bvec[i] <- PolToCart(b0,theta)$x
-          }
-          for (i in ind2) {
-            bvec[i] <- PolToCart(b0,theta)$y
-          }
+          bvec[ind1] <- PolToCart(b0,theta)$x
+          bvec[ind2] <- PolToCart(b0,theta)$y
           best0 <- decision_function(data, bias = bvec)
           
-          for (i in ind1) {
-            bvec[i] <- PolToCart(b1,theta)$x
-          }
-          for (i in ind2) {
-            bvec[i] <- PolToCart(b1,theta)$y
-          }
+          bvec[ind1] <- PolToCart(b1,theta)$x
+          bvec[ind2] <- PolToCart(b1,theta)$y
           best1 <- decision_function(data, bias = bvec)
           
-          for (i in ind1) {
-            bvec[i] <- PolToCart(b2,theta)$x
-          }
-          for (i in ind2) {
-            bvec[i] <- PolToCart(b2,theta)$y
-          }
+          bvec[ind1] <- PolToCart(b2,theta)$x
+          bvec[ind2] <- PolToCart(b2,theta)$y
           best2 <- decision_function(data, bias = bvec)
         }
         x <- PolToCart(b0,theta)$x
@@ -293,12 +272,10 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 10,
 #'    original function call 
 #' @param labX  String object containing the label for the x axis of the plot. 
 #'    Defaults to NULL, in which case the label is automatically generated to
-#'    report the set of indices (ind1) to which the first bias adjustment was 
-#'    applied.
+#'    report the index (ind1) to which the first bias adjustment was applied.
 #' @param labY  String object containing the label for the y axis of the plot. 
 #'    Defaults to NULL, in which case the label is automatically generated to
-#'    report the set of indices (ind2) to which the second bias adjustment was 
-#'    applied.
+#'    report the index (ind2) to which the second bias adjustment was applied.
 #'    
 #' @import ggplot2 ggforce
 #' 
@@ -313,14 +290,12 @@ print_thresh_2D <- function(thresh_obj, labX = NULL, labY = NULL){
   ind2 <- thresh_obj$args$ind2
   admin <- thresh_obj$args$admin
   
-  # define labels for sets or individual indices of bias adjustment
+  # define labels for individual indices of bias adjustment
   if (is.null(labX)) {
-    labX <- paste0("Bias (", ifelse(length(ind1) > 1, "Indices ", "Index "), 
-                   paste0(ind1, collapse = ", "), ")")
+    labX <- paste0("Bias (Index ", ind1, ")")
   }
   if (is.null(labY)) {
-    labY <- paste0("Bias (", ifelse(length(ind2) > 1, "Indices ", "Index "), 
-                   paste0(ind2, collapse = ", "), ")")
+    labY <- paste0("Bias (Index ", ind2, ")")
   }
   
   plt <- ggplot(data = thresh.df, aes(x = Bias_Ind_1, y = Bias_Ind_2)) +
@@ -334,7 +309,7 @@ print_thresh_2D <- function(thresh_obj, labX = NULL, labY = NULL){
     geom_point(aes(colour = as.factor(New_Rec))) +
     
     # visualize the boundary of the administrative cutoff
-    geom_circle(data = data.frame(null = c(0)), aes(x0=0,y0=0,r=admin), 
+    geom_circle(data = data.frame(null = c(0)), aes(x0=0, y0=0, r=admin), 
                 inherit.aes=FALSE, linetype=2) +
     
     # label the plot in accordance with the settings of the boundary finding
