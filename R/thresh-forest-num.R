@@ -205,8 +205,8 @@ thresh_forest.num <- function(thresh_obj,
   
   # Present invariant intervals
   for (i in 1:N) {
-    pd[i, "II.txt"] <- paste0("(", printsig(pd[i, "II.lo"], cutyn = TRUE), ", ",
-                              printsig(pd[i, "II.hi"], cutyn = TRUE), ")")
+    pd[i, "II.txt"] <- paste0("(", printsigII(pd[i, "II.lo"], cutyn = TRUE), ", ",
+                              printsigII(pd[i, "II.hi"], cutyn = TRUE), ")")
   }
   
   # If no thresholds found (or beyond cutoff), set newkstar to "-"
