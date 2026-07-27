@@ -14,13 +14,11 @@ original function call}
 
 \item{labX}{String object containing the label for the x axis of the plot.
 Defaults to NULL, in which case the label is automatically generated to
-report the set of indices (ind1) to which the first bias adjustment was
-applied.}
+report the index (ind1) to which the first bias adjustment was applied.}
 
 \item{labY}{String object containing the label for the y axis of the plot.
 Defaults to NULL, in which case the label is automatically generated to
-report the set of indices (ind2) to which the second bias adjustment was
-applied.}
+report the index (ind2) to which the second bias adjustment was applied.}
 }
 \description{
 This function allows for repeated plotting of the decision-invariant bias

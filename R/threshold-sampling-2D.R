@@ -37,6 +37,7 @@
 #'    
 #' @import doFuture
 #' @importFrom future plan
+#' @importFrom foreach foreach
 #' @importFrom DescTools PolToCart
 #' @importFrom DescTools CartToPol
 #' 

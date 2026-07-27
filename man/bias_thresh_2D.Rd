@@ -26,13 +26,11 @@ passed as an argument to decision_function}
 used to implement the decision rule at each step of the boundary finding
 method}
 
-\item{ind1}{Numerical vector indicating the indices of the sequential list
-of data points for which the first generic bias adjustment should be
-applied}
+\item{ind1}{Integer indicating the index of the sequential list of data
+points to which the first generic bias adjustment should be applied}
 
-\item{ind2}{Numerical vector indicating the indices of the sequential list
-of data points for which the second generic bias adjustment should be
-applied}
+\item{ind2}{Integer indicating the index of the sequential list of data
+points for which the second generic bias adjustment should be applied}
 
 \item{admin}{Administrative cutoff value for bias adjustment beyond which
 decision invariance will not be assessed}

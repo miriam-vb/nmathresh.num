@@ -30,6 +30,7 @@
 #'    
 #' @import doFuture
 #' @importFrom future plan
+#' @importFrom foreach foreach
 #' 
 #' @export 
 
