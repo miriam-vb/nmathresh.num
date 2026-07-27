@@ -22,4 +22,8 @@ Imports:
     doFuture
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
 URL: https://github.com/miriam-vb/nmathresh.num
