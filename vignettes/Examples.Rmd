@@ -1,0 +1,136 @@
+---
+title: "Examples: numerical bias adjustment thresholds for NMA"
+author: "Miriam Van Bergeyk, University of Waterloo"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{"Examples: numerical bias adjustment thresholds for NMA"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Introduction
+
+This vignette provides worked examples for the 'nmathresh.num' package, recreating exactly the analysis performed in the paper "Interval Bisection Approach to Threshold Analysis for Network Meta-Analysis".
+
+# Comparison with Analytical Approach
+To compare the techniques of Phillippo et al. and our proposed method, we replicate an example from their 2019 paper illustrating the varying complexity of possible decision rules. The data forming the basis of the analysis are comprised of 11 studies comparing 8 distinct headache treatments: telmisartan, amitriptyline, divalproex sodium, gabapentin, topiramate, propranolol, propranolol-nadolol, and placebo. The outcome under study was the number of headache days per month associated with each treatment. 
+
+```{r, echo=FALSE, out.width='60%', fig.cap="Headache treatment network."}
+knitr::include_graphics("Headache Network.png")
+```
+
+Phillippo et al. (2019) generated the posterior summaries for the relative treatment contrasts using WinBUGS, and these results are available either from the supplementary data accompanying their paper or from the 'nmathresh.num' package.
+
+```{r}
+library(nmathresh.num)
+
+# Read in the posterior summaries
+load("./Headache posterior summaries.Rda")
+load("./Headache posterior covariance.Rda")
+
+# Posterior means of treatment parameters
+post.mean.d <- post.summary$statistics[1:7, "Mean"]
+post.cov.d <- post.cov[1:7, 1:7]
+
+```
+
+Following the work of Phillippo et al. (2019), we reconstruct the likelihood covariance matrix for these data using the 'recon_vcov' function from the 'nmathresh' package, using a flat prior with precision 0.0001.
+
+```{r}
+# Contrast design matrix 
+X <- matrix(ncol = 7,byrow = TRUE,
+            # d2 d3 d4 d5 d6 d7 d8
+            c(1, 0, 0, 0, 0, 0, 0,
+              0, 0, 1, 0, 0, 0, 0,
+              0, 0, 0, 1, 0, 0, 0,
+              0, 0, 0, 0, 1, 0, 0,
+              0, 0, 0, 0, 0, 1, 0,
+              0, 0, 0, 0, 0, 0, 1,
+              0,-1, 0, 0, 1, 0, 0,
+              0, 0, 0, 0,-1, 1, 0))
+
+# Reconstruct using NNLS
+lik.cov <- nmathresh::recon_vcov(post.cov.d,  # Posterior covariance matrix
+                      prior.prec = .0001,  # Prior precision
+                      X = X)               # Contrast design matrix
+
+```
+
+Since the posterior summaries of the relative treatment effects are reported with respect to placebo, we need to create a new vector of relative treatment effects that reports the contrasts represented by edges in the headache treatment network.
+
+```{r}
+# data reformatting for bias threshold analysis
+pmean <- c()
+trt <- c(2,4,5,6,7,8,6,7)
+base <- c(1,1,1,1,1,1,3,6)
+for (i in 1:length(trt)) {
+  pmean[length(pmean)+1] <- ifelse(base[i] == 1, post.mean.d[trt[i]-1], 
+                                   post.mean.d[trt[i]-1] - post.mean.d[base[i]-1])
+}
+
+n <- length(pmean)
+
+# store posterior mean estimates, contrast design matrix, likelihood covariance 
+# matrix and posterior covariance matrix in a singular list
+data <- list(pmean = pmean, X = X, W = lik.cov, post = post.cov.d)
+
+```
+
+
+Because this analysis is performed at the level of aggregated contrasts, each estimate of the true underlying treatment contrast is informed by only one observed estimate, and thus a common-effects model is appropriate. Hence we do not estimate $\tau^2$ or attempt to account for between-study heterogeneity in our likelihood covariance matrix.
+
+With our data properly formatted, we can construct a function to implement the decision rule that recommends any treatment that both reduces the expected number of headache days per month by a minimal clinically important difference (mcid) of 0.5 with respect to placebo (treatment 1) and is within 0.5 expected headache days of the most effective treatment. Evaluating this function before bias adjustment, we discover that treatments 3, 6 and 7, or equivalently amitriptyline, topiramate and propranolol, are within the optimal set. Using 'bias_thresh_1D', we can then iteratively assess the effect of bias adjustment on the outcomes of our NMA to determine the estimated bias thresholds at which this optimal set changes.
+
+```{r}
+
+head_dec <- function(data, bias = rep(0,n)) {
+  # construct Aitken's projection matrix
+  H <- solve(t(data$X)%*%(solve(data$W))%*%(data$X))%*%
+       t(data$X)%*%(solve(data$W))
+  
+  # obtain estimated treatment effects under bias adjustment
+  treatment_est <- H%*%(data$pmean+bias)
+  
+  # determine maximally efficacious treatment
+  if (all(treatment_est > -0.5)) {
+    best <- c(1)
+  } else {
+    best <- c(which.min(treatment_est) + 1)
+  }
+  ref <- best[1]
+  
+  # include all treatments within mcid of ref in the optimal treatment set
+  for (i in 1:length(treatment_est)) {
+    if (treatment_est[i] <= -0.5 && i != ref - 1 &&
+        treatment_est[i] - 0.5 <= treatment_est[ref-1]) {
+      best[length(best)+1] <- i + 1
+    }
+  }
+  
+  # return optimal treatment set
+  return(sort(best))
+}
+
+head_dec(data)
+
+# determine the bias adjustment thresholds for each contrast
+head_1D <- bias_thresh_1D(data, decision_function = head_dec, indices = 1:n, preset = 0, admin = 30)
+
+```
+
+Using the function 'thresh_forest.num', we can display these estimated thresholds in a forest plot along with the 95\% credible intervals reported by Phillippo et al. (2019) for the posterior means.
+
+```{r, fig.width = 12, fig.height = 3.5, out.width='100%', dpi=300}
+# include CrI estimates and appropriate row labels
+CrI.lo <- c(-2.32,-0.99,-1.6,-1.51,-2.20,-1.64,-1.13,-1.11)
+CrI.hi <- c(1.27,1.23,1.58,-0.58,-0.2,0.45,1.32,0.82)
+
+rlab <- c("2 vs. 1", "4 vs. 1", "5 vs. 1", "6 vs. 1", "7 vs. 1", "8 vs. 1", "6 vs. 3", "7 vs. 6")
+
+thresh_forest.num(head_1D, pmean, CrI.lo, CrI.hi, rlab, xlim = c(-3,2), xlab = "Change in Headache Days per Month", label.title = "Contrast", CI.title = "95% CrI", refline = 0, digits = 2)
+
+```
+
+When the endpoint of the credible interval for a given data point lies beyond the boundary of its bias invariant interval, the portion of the invariant interval corresponding to the associated direction of bias adjustment is plotted in pink, rather than blue. As evidenced by the many pink subintervals illustrated above, the 95\% credible intervals of each treatment contrast exceed their associated bias invariant intervals in at least one direction, with both of the 6 vs. 3 and 7 vs. 6 contrasts having bias invariant intervals that are proper subsets of their credible intervals. This indicates that the recommendation of amitriptyline, topiramate and propranolol as optimal treatments might not be robust to the inherent uncertainty or potential bias in each of our contrast estimates.
+
+
