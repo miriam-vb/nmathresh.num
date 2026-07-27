@@ -196,8 +196,8 @@ thresh_forest.num <- function(thresh_obj,
   
   # Present CIs
   for (i in 1:N) {
-    pd[i, "CI.txt"] <- paste0("(", ifelse(is.na(pd[i, "CI.lo"]), "\u2013", printsig(pd[i, "CI.lo"])), ", ",
-                              ifelse(is.na(pd[i, "CI.hi"]), "\u2013", printsig(pd[i, "CI.hi"])), ")")
+    pd[i, "CI.txt"] <- paste0("(", ifelse(is.na(pd[i, "CI.lo"]), "–", printsig(pd[i, "CI.lo"])), ", ",
+                              ifelse(is.na(pd[i, "CI.hi"]), "–", printsig(pd[i, "CI.hi"])), ")")
   }
   
   # Format means
@@ -205,13 +205,13 @@ thresh_forest.num <- function(thresh_obj,
   
   # Present invariant intervals
   for (i in 1:N) {
-    pd[i, "II.txt"] <- paste0("(", printsigII(pd[i, "II.lo"], cutyn = TRUE), ", ",
-                              printsigII(pd[i, "II.hi"], cutyn = TRUE), ")")
+    pd[i, "II.txt"] <- paste0("(", printsigII(pd[i, "II.lo"], pd[i, "lo.newkstar"], cutyn = TRUE), ", ",
+                              printsigII(pd[i, "II.hi"], pd[i, "hi.newkstar"], cutyn = TRUE), ")")
   }
   
   # If no thresholds found (or beyond cutoff), set newkstar to "-"
-  pd$lo.newkstar[is.na(pd$lo.newkstar) | pd$II.lo <= cutoff[1]] <- "\u2013"
-  pd$hi.newkstar[is.na(pd$hi.newkstar) | pd$II.hi >= cutoff[2]] <- "\u2013"
+  pd$lo.newkstar[is.na(pd$lo.newkstar) | pd$II.lo <= cutoff[1]] <- "–"
+  pd$hi.newkstar[is.na(pd$hi.newkstar) | pd$II.hi >= cutoff[2]] <- "–"
   
   # Get details of short (statistically insignificant) intervals
   pd$is.short <- (!is.na(pd$CI.lo) & pd$II.lo > pd$CI.lo) | (!is.na(pd$CI.hi) & pd$II.hi < pd$CI.hi)
