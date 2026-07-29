@@ -20,34 +20,35 @@ bat_2D(
 }
 \arguments{
 \item{data}{Object (data frame, list, etc.) containing the NMA data that is
-passed as an argument to decision_function}
+passed as an argument to \code{decision_function}.}
 
 \item{decision_function}{Function accepting NMA data and bias adjustment
 used to implement the decision rule at each step of the boundary finding
-method}
+method (see Details for default function and further description).}
 
 \item{ind1}{Integer indicating the index of the sequential list of data
-points to which the first generic bias adjustment should be applied}
+points to which the first generic bias adjustment should be applied.}
 
 \item{ind2}{Integer indicating the index of the sequential list of data
-points for which the second generic bias adjustment should be applied}
+points for which the second generic bias adjustment should be applied.}
 
 \item{admin}{Administrative cutoff value for bias adjustment beyond which
-decision invariance will not be assessed}
+decision invariance will not be assessed.}
 
 \item{tol}{Tolerance for the absolute difference between converging boundary
-estimates}
+estimates.}
 
 \item{rad_jump}{Angle (in radians) by which the angle of bias assessment in
-the polar framework will increase for each sequential iteration}
+the polar framework will increase for each sequential iteration.}
 
-\item{dist_tol}{Euclidean distance tolerance between any two sequential points}
+\item{dist_tol}{Euclidean distance tolerance between any two sequential points.}
 
 \item{plot}{Boolean determining whether the function call should also output
-a plot of the invariant region}
+a plot of the invariant region.}
 
 \item{preset}{Numeric value determining whether a specific preset
-decision_function should be implemented rather than a user-supplied function}
+decision_function should be implemented rather than a user-supplied function
+(see Details for further description).}
 
 \item{future_plan}{Function call of future::plan that specifies how futures
 are to be resolved. Defaults to sequential evaluation with one worker.}
@@ -65,4 +66,25 @@ bias adjustment thresholds for network meta-analysis, with options to use
 either preset or user-defined decision functions. Thresholds represent
 the amount of simultaneous adjustment needed in up to two individual data
 points before the treatment decision changes.
+}
+\details{
+The default decision function implemented by the \code{bat_1D} and \code{bat_2D}
+functions relies on the typical frequentist estimation method of generalized
+least-squares regression to obtain the estimated relative treatment effects,
+\eqn{\tilde{\theta}(\beta)= H(y + \beta)}. From this resultant vector, we can
+determine the optimal treatment under maximal efficacy by selecting the treatment
+with the greatest relative effect with respect to the common comparator (the
+treatment corresponding to \eqn{\max \tilde{\theta}(\beta)}), or the comparator
+itself if all relative effects are estimated to be negative. Setting \code{preset = 1}
+implements this frequentist GLS maximal efficacy approach, and \code{preset = 2}
+uses the same GLS method to instead identify the minimal treatment effect as
+optimal. When approaching problems for which this default decision function
+is unsuitable, the \texttt{preset} argument can be set to 0 and a user-defined
+decision function can be passed to each threshold finding function as argument.
+This decision function must take as its only unspecified argument the object
+(i.e. list, data frame, etc.) passed as \texttt{data} to the threshold finding
+function, along with a bias vector of length \eqn{n} (set by default to
+\eqn{\mathbf{0}}) where \eqn{n} is the length of \eqn{y}, our observed data
+vector. Beside needing to return a vector of recommendations with no duplicate
+elements, there are no further constraints on the form of the decision function.
 }
