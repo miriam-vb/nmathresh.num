@@ -44,9 +44,9 @@
 #' @export
 
 
-bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 10, 
-                           tol = 10**(-3), rad_jump = pi/90, dist_tol = 0.5, 
-                           plot = TRUE, preset = 1, future_plan = plan("sequential")){
+bat_2D <- function(data, decision_function, ind1, ind2, admin = 10, 
+                   tol = 10**(-3), rad_jump = pi/90, dist_tol = 0.5, 
+                   plot = TRUE, preset = 1, future_plan = plan("sequential")){
   
   # set decision_function to frequentist threshold analysis using the 
   # projection matrix with max efficacy as default
@@ -254,7 +254,7 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 10,
   
   if (plot == TRUE) {
     # print out a graph of the boundary points of the region
-    print_thresh_2D(thresh_obj)
+    print_bat_2D(thresh_obj)
   }
   
   return(thresh_obj)
@@ -265,7 +265,7 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 10,
 #' 
 #' This function allows for repeated plotting of the decision-invariant bias 
 #' adjustment thresholds and invariant region for two-dimensional threshold 
-#' analysis, and is called by \code{bias-thresh-2D} automatically.
+#' analysis, and is called by \code{bat-2D} automatically.
 #'
 #' @param thresh_obj  List object obtained from \code{bias-thresh-2D} function 
 #'    call containing the estimated decision-invariant bias
@@ -283,7 +283,7 @@ bias_thresh_2D <- function(data, decision_function, ind1, ind2, admin = 10,
 #' @export
 
 
-print_thresh_2D <- function(thresh_obj, labX = NULL, labY = NULL){
+print_bat_2D <- function(thresh_obj, labX = NULL, labY = NULL){
   
   # import arguments from bias_thresh_2D call
   thresh.df <- thresh_obj$thresh.df

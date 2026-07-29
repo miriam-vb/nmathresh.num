@@ -8,8 +8,6 @@
 #' 
 #' @import Matrix
 #' @import MASS
-#' 
-#' @export
 
 
 prepare <- function(TE, seTE, treat1, treat2, studlab, tau = 0,

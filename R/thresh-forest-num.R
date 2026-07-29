@@ -3,7 +3,7 @@
 #' This function produces threshold forest plots overlaying the
 #' decision-invariant intervals on the data points and their confidence/credible
 #' intervals. This function was copied from the R package nmathresh and modified 
-#' to accommodate the output created by bias_thresh_1D.
+#' to accommodate the output created by \code{bat_1D}.
 #' 
 #' Original author: David M. Phillippo <david.phillippo@bristol.ac.uk>
 #' Source: https://github.com/dmphillippo/nmathresh/blob/develop/R/thresh_forest.R
@@ -11,7 +11,7 @@
 #'
 #' @param thresh_obj A list containing the data frame of bias thresholds and 
 #'   the list of arguments defined in the original function call, as produced
-#'   by \code{bias_thresh_1D}.
+#'   by \code{bat_1D}.
 #' @param y Data points. Either a column of \code{data}, or a numeric vector.
 #' @param CI.lo Confidence/credible interval lower limits. Either a column of
 #'   \code{data}, or a numeric vector.
@@ -28,7 +28,8 @@
 #'   confidence/credible intervals (\code{CI.lo}, \code{CI.hi}), and row labels
 #'   \code{labels}. If \code{data} is not provided, the above variables will be
 #'   searched for in the calling environment.
-#' @param CI.title Title for CI column, default "95\% Confidence Interval".
+#' @param CI.title Title for confidence or credible interval column, default 
+#'    "95% Confidence Interval".
 #' @param label.title Character string giving the heading for the row labels
 #'   column.
 #' @param y.title Character string giving the heading for the data points
@@ -81,7 +82,7 @@
 #' @export
 
 
-thresh_forest.num <- function(thresh_obj,
+bat_forest <- function(thresh_obj,
                           y, CI.lo, CI.hi, label, orderby = NULL, data = NULL,
                           CI.title = "95% Confidence Interval",
                           label.title = "", y.title = "Mean",

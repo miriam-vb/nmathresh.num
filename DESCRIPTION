@@ -1,5 +1,5 @@
-Package: nmathresh.num
-Title: Numerical Bias Adjustment Threshold Finding
+Package: nmabat
+Title: Numerical Bias Adjustment Threshold Finding for NMA
 Version: 0.0.0.9000
 Authors@R: 
     person("Miriam", "Van Bergeyk", , "mvanberg@uwaterloo.ca", role = c("aut", "cre"))
@@ -26,4 +26,4 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
-URL: https://github.com/miriam-vb/nmathresh.num
+URL: https://github.com/miriam-vb/nmabat

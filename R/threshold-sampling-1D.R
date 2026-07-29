@@ -35,8 +35,8 @@
 #' @export 
 
 
-bias_thresh_1D <- function(data, decision_function = NULL, indices, admin = 10, 
-                        tol = 10**(-3), preset = 1, future_plan = plan("sequential")) {
+bat_1D <- function(data, decision_function = NULL, indices, admin = 10, 
+                   tol = 10**(-3), preset = 1, future_plan = plan("sequential")) {
   
   # set decision_function to frequentist threshold analysis using the 
   # projection matrix with max efficacy as default

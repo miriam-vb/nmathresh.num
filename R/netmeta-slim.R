@@ -6,8 +6,8 @@
 #' approach to network meta-analysis, which is equivalent to the Frequentist 
 #' approach based on weighted least squares regression. This slimmed version
 #' of the function was copied from the netmeta package and modified to focus 
-#' on efficiently estimating the relative treatment effect estimates and their 
-#' standard errors for both a fixed effects and random effects model.
+#' on efficiently estimating the relative treatment effect and their standard
+#' errors for both a common-effects and random-effects model.
 #' 
 #' Source: https://github.com/guido-s/netmeta/blob/develop/R/netmeta.R
 #' License: GPL (>=2)
@@ -47,7 +47,7 @@
 #'    treatment labels
 #' @param nchar.trts  Numeric defining the minimum number of characters used to
 #'    create unique treatment names (see Details of the netmeta function)
-#' @param nchar.studlab  Numeric definign the minimum number of characters used 
+#' @param nchar.studlab  Numeric defining the minimum number of characters used 
 #'    to create unique study labels
 #' @param func.inverse  R function used to calculate the pseudoinverse (defaults
 #'    to the Moore-Penrose pseudoinverse) of the Laplacian matrix L
@@ -65,10 +65,10 @@
 #'    studies are excluded from meta-analysis due to zero standard errors)
 #'
 #' @return  List containing studlab, treat1, treat2, TE and seTE as passed to 
-#'    the function, as well as TE.common and TE.random, \eqn{n \times n} matrices
-#'    (\eqn{n} representing the total number of treatments) containing the 
+#'    the function, as well as TE.common and TE.random, \eqn{K \times K} matrices
+#'    (\eqn{K} representing the total number of treatments) containing the 
 #'    estimated overall treatment effects from the common/random effects model, 
-#'    respectively, along with seTE.common and seTE.random, \eqn{n \times n} 
+#'    respectively, along with seTE.common and seTE.random, \eqn{K \times K} 
 #'    matrices containing the estimated standard errors for these estimates.
 #'   
 #' @import MASS
