@@ -157,12 +157,12 @@ net_slim <- netmeta_slim(pw)
 ```
 
 With our data properly formatted, we can construct a function to implement the decision rule that recommends the treatment that is most cost-effective in regards to the net benefit function
-$$ NB(k,w) = T_k \cdot g \cdot w - C_k, $$
-with $w$ representing the value that a decision maker is willing to spend to achieve a one unit gain in quality adjusted life years (QALYs), and $g$ representing the number of QALYs gained as a result of smoking cessation. This function depends on the absolute probabilities of smoking cessation
-$$ \text{logit}(T_k) = -2.589 + \tilde{\theta}_{1k} $$
-where $-2.589$ is the predictive mean for the log odds of smoking cessation under no contact as given by Dias et al. (2018) and $\tilde{\theta}_{1k}$ is the estimated log odds ratio of smoking cessation for treatment $k$ as compared to no contact that we obtain from our NMA. To account for possible heterogeneity in the observed data, the estimates for the log odds ratios of each treatment are obtained from a random-effects NMA, which we use 'netmeta_slim' to implement.
+$$ NB(k,w,\beta) = \zeta(\beta)_k \cdot g \cdot w - c_k, $$
+with $w$ representing the value that a decision maker is willing to spend to achieve a one unit gain in quality adjusted life years (QALYs), and $g$ representing the number of QALYs gained as a result of smoking cessation. This function depends on the absolute probabilities of smoking cessation, $\zeta(\beta)_k$ for each treatment $k$, defined as
+$$ \text{logit}(\zeta(\beta)_k) = -2.589 + \tilde{\theta}(\beta)_{1k} $$
+where $-2.589$ is the predictive mean for the log odds of smoking cessation under no contact as given by Dias et al. (2018) and $\tilde{\theta}(\beta)_{1k}$ is the estimated log odds ratio of smoking cessation for treatment $k$ as compared to no contact that we obtain from our NMA following bias adjustment by $\beta$. To account for possible heterogeneity in the observed data, the estimates for the log odds ratios of each treatment are obtained from a random-effects NMA, which we use 'netmeta_slim' to implement. 
 
-Additionally, the net benefit of each treatment cannot be calculated without $C_k$, the expected cost of each treatment $k$, which are reported by Dias et al. (2018) in British pounds as \pounds 0 for no contact, \pounds 200 for self-help, \pounds 6000 for individual counselling and \pounds 600 for group therapy. Assuming that smoking cessation results in a gain of 15 QALYs and employing the standard willingness to pay value of \pounds 20,000 per QALY gained, we can then substitute $lyg = 15$, $w = 20000$, $T_k$ and $C_k$ to obtain our estimates of net benefit for each treatment $k$, the maximal of which corresponds to the most cost-effective treatment. Before bias adjustment, group counselling is identified by this function as most cost-effective.
+Additionally, the net benefit of each treatment cannot be calculated without $c_k$, the expected cost of each treatment $k$, which are reported by Dias et al. (2018) in British pounds as &#8356;0 for no contact, &#8356;200 for self-help, &#8356;6000 for individual counselling and &#8356;600 for group therapy. Assuming that smoking cessation results in a gain of 15 QALYs and employing the standard willingness to pay value of &#8356;20,000 per QALY gained, we can then substitute $g = 15$, $w = 20000$, $\zeta(\beta)_k$ and $c_k$ to obtain our estimates of net benefit for each treatment $k$, the maximal of which corresponds to the most cost-effective treatment. Before bias adjustment, group counselling is identified by this function as most cost-effective.
 
 ```{r}
 # Define the CEA decision function
@@ -192,12 +192,12 @@ CEA_decision <- function(data, bias = rep(0,n)) {
 }
 
 # One-dimensional threshold analysis for 2-arm studies
-CEA_2arm_1D <- bat_1D(data = pw, decision_function = CEA_decision, indices = 7:n, preset = 0, admin = 10, future_plan = plan(multisession))
+CEA_2arm_1D <- bat_1D(data = pw, decision_function = CEA_decision, indices = 7:n, preset = 0, admin = 10, future_plan = future::plan('multisession'))
 
 # Two-dimensional threshold analysis for 2-arm studies
-CEA_2arm_2D.1 <- bat_2D(data = pw, decision_function = CEA_decision, ind1 = c(10), ind2 = c(26), preset = 0, admin = 10, future_plan = plan(multisession, workers = 16), plot = FALSE)
+CEA_2arm_2D.1 <- bat_2D(data = pw, decision_function = CEA_decision, ind1 = c(10), ind2 = c(26), preset = 0, admin = 10, future_plan = future::plan('multisession', workers = 16), plot = FALSE)
 
-CEA_2arm_2D.2 <- bat_2D(data = pw, decision_function = CEA_decision, ind1 = c(23), ind2 = c(25), preset = 0, admin = 10, future_plan = plan(multisession, workers = 16), plot = FALSE)
+CEA_2arm_2D.2 <- bat_2D(data = pw, decision_function = CEA_decision, ind1 = c(23), ind2 = c(25), preset = 0, admin = 10, future_plan = future::plan('multisession', workers = 16), plot = FALSE)
 
 ```
 
@@ -211,7 +211,7 @@ pw$treat1_num <- lkup[pw$treat1]
 labs <- paste0(pw$treat2_num, " vs. ", pw$treat1_num, " (", pw$studlab,")")
 
 # Forest plot for bias adjustment in 2-arm studies
-bat_forest(CEA_2arm_1D, net_slim$TE[7:n], net_slim$TE[7:n]-3*net_slim$seTE[7:n], net_slim$TE[7:n]+3*net_slim$seTE[7:n], labs[7:n], xlim = c(-10,10), y.title = "LOR", xlab = "Log Odds Ratio", label.title = "Contrast (Study)")
+bat_forest(CEA_2arm_1D, net_slim$TE[7:n], net_slim$TE[7:n]-3*net_slim$seTE[7:n], net_slim$TE[7:n]+3*net_slim$seTE[7:n], labs[7:n], xlim = c(-10,10), y.title = "LOR", xlab = "Log Odds Ratio", label.title = "Contrast (Study)", calcdim = FALSE)
 
 # 2D plot for simultaneous bias adjustment
 print_bat_2D(CEA_2arm_2D.1, labX = "Bias (Study 06)", labY = "Bias (Study 22)")
@@ -271,12 +271,13 @@ CEA_3arm_1D <- bat_1D(data = pw, decision_function = proj_decision, indices = 1:
 
 ```
 
-Implementing a decision function to perform this projected arm-level bias adjustment for the smoking cessation data, we obtain the thresholds for multi-arm studies 01 and 02 as reported below. The confidence intervals for each log odds are constructed using the approximate distribution of log odds as outlined by B{\'e}liveau and Gustafson (2021).
+Implementing a decision function to perform this projected arm-level bias adjustment for the smoking cessation data, we obtain the thresholds for multi-arm studies 01 and 02 as reported below. The confidence intervals for each log odds are constructed using the approximate distribution of log odds as outlined by B&#233;liveau and Gustafson (2021).
 
-```{r}
+```{r, fig.width= 14.27, fig.height = 3.05, out.width='100%', dpi=300}
 # 3-arm studies only (arm level bias projected to study level)
 labs2 <- c("1 (01)", "3 (01)", "4 (01)", "2 (02)", "3 (02)", "4 (02)")
-## need to make the "mean" column into the Log Odds column within each arm to actually reflect the bias adjustment
+
+# format the log odds column within each arm 
 pw[1:6,c(2,3,6,7,8,9)]
 logodds <- function(p) {
   return (log(p/(1-p)))
@@ -286,10 +287,11 @@ invlogodds <- function(p) {
 }
 LO <- c(logodds(pw$event1[1]/pw$n1[1]), logodds(pw$event2[1]/pw$n2[1]), logodds(pw$event2[2]/pw$n2[2]), logodds(pw$event1[4]/pw$n1[4]), logodds(pw$event2[4]/pw$n2[4]), logodds(pw$event2[5]/pw$n2[5]))
 
+# estimate variance of the log odds in each arm
 nVec <- c(pw$n1[1],pw$n2[1],pw$n1[2],pw$n1[4],pw$n2[4],pw$n2[5])
 var <- mapply(function(i) (nVec[i]*invlogodds(LO[i])*(1-invlogodds(LO[i])))**(-1),1:6)
 
-bat_forest(CEA_3arm_1D, LO, LO - 1.96*sqrt(var), LO + 1.96*sqrt(var), labs2, xlim = c(-6,2), y.title = "LO", xlab = "Log Odds", label.title = "Treatment (Study)")
+bat_forest(CEA_3arm_1D, LO, LO - 1.96*sqrt(var), LO + 1.96*sqrt(var), labs2, xlim = c(-6,2), y.title = "LO", xlab = "Log Odds", label.title = "Treatment (Study)", calcdim = FALSE)
 
 ```
 
