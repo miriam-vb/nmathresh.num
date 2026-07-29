@@ -79,10 +79,10 @@ itself if all relative effects are estimated to be negative. Setting \code{prese
 implements this frequentist GLS maximal efficacy approach, and \code{preset = 2}
 uses the same GLS method to instead identify the minimal treatment effect as
 optimal. When approaching problems for which this default decision function
-is unsuitable, the \texttt{preset} argument can be set to 0 and a user-defined
+is unsuitable, the \code{preset} argument can be set to 0 and a user-defined
 decision function can be passed to each threshold finding function as argument.
 This decision function must take as its only unspecified argument the object
-(i.e. list, data frame, etc.) passed as \texttt{data} to the threshold finding
+(i.e. list, data frame, etc.) passed as \code{data} to the threshold finding
 function, along with a bias vector of length \eqn{n} (set by default to
 \eqn{\mathbf{0}}) where \eqn{n} is the length of \eqn{y}, our observed data
 vector. Beside needing to return a vector of recommendations with no duplicate
