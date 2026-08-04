@@ -218,7 +218,7 @@ bat_1D <- function(data, decision_function = NULL, indices, admin = 10,
   }
   thresh <- foreach(ind = indices, .options.future = 
                     list(seed = TRUE, package = structure(TRUE, 
-                    add = c("nmathresh.num")))) %dofuture% {
+                    add = c("nmabat")))) %dofuture% {
     thresh_conv(ind)
   }
   # reform the data.frame using futures

@@ -245,9 +245,10 @@ bat_2D <- function(data, decision_function, ind1, ind2, admin = 10,
   # by plan 
   if (n_workers > 1) {
     thresh <- foreach(core = 1:n_workers, .options.future = 
-                        list(seed = TRUE)) %dofuture% {
+                        list(seed = TRUE, package = structure(TRUE, 
+                        add = c("nmabat")))) %dofuture% {
                            thresh_conv(core, n_workers)
-    } %packages% "nmathresh.num"
+    } 
     # reform the data.frame using futures
     thresh.df <- Reduce(function(x, y) merge(x, y, all=TRUE), thresh)
     rownames(thresh.df) <- NULL
