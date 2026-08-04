@@ -11,12 +11,11 @@ The `nmabat` package implements numerical methods for calculating and visualizin
 You can install the development version of `nmabat` from [GitHub](https://github.com/miriam-vb/nmabat) with:
 
 ``` r
-# install.packages("pak")
-pkg.build_vignettes = TRUE
-pak::pak("miriam-vb/nmabat")
+# install.packages("remotes")
+remotes::install_github("miriam-vb/nmabat", build_vignettes=TRUE)
 ```
 
-Worked examples illustrating applications of the method are available in the vignettes associated with the package:
+The vignettes associated with the package contain worked examples illustrating applications of the method, and they may take a few minutes to build during installation. The vignettes can then be accessed with the following call:
 
 ``` r
 browseVignettes("nmabat")

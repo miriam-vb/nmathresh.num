@@ -10,7 +10,7 @@ vignette: >
 
 # Introduction
 
-This vignette provides worked examples for the 'nmabat' package, recreating exactly the analysis performed in the paper "Interval Bisection Approach to Threshold Analysis for Network Meta-Analysis".
+This vignette provides worked examples for the `nmabat` package, recreating exactly the analysis performed in the paper "Interval Bisection Approach to Threshold Analysis for Network Meta-Analysis".
 
 # Comparison with Analytical Approach
 To compare the techniques of Phillippo et al. and our proposed method, we replicate an example from their 2019 paper illustrating the varying complexity of possible decision rules. The data forming the basis of the analysis are comprised of 11 studies comparing 8 distinct headache treatments: telmisartan, amitriptyline, divalproex sodium, gabapentin, topiramate, propranolol, propranolol-nadolol, and placebo. The outcome under study was the number of headache days per month associated with each treatment. 
@@ -19,7 +19,7 @@ To compare the techniques of Phillippo et al. and our proposed method, we replic
 knitr::include_graphics("Headache Network.png")
 ```
 
-Phillippo et al. (2019) generated the posterior summaries for the relative treatment contrasts using WinBUGS, and these results are available either from the supplementary data accompanying their paper or from the 'nmabat' package.
+Phillippo et al. (2019) generated the posterior summaries for the relative treatment contrasts using WinBUGS, and these results are available either from the supplementary data accompanying their paper or from the `nmabat` package.
 
 ```{r}
 library(nmabat)
@@ -34,7 +34,7 @@ post.cov.d <- post.cov[1:7, 1:7]
 
 ```
 
-Following the work of Phillippo et al. (2019), we reconstruct the likelihood covariance matrix for these data using the 'recon_vcov' function from the 'nmathresh' package, using a flat prior with precision 0.0001.
+Following the work of Phillippo et al. (2019), we reconstruct the likelihood covariance matrix for these data using the `recon_vcov` function from the `nmathresh` package, using a flat prior with precision 0.0001.
 
 ```{r}
 # Contrast design matrix 
@@ -79,7 +79,7 @@ data <- list(pmean = pmean, X = X, W = lik.cov, post = post.cov.d)
 
 Because this analysis is performed at the level of aggregated contrasts, each estimate of the true underlying treatment contrast is informed by only one observed estimate, and thus a common-effects model is appropriate. Hence we do not estimate $\tau^2$ or attempt to account for between-study heterogeneity in our likelihood covariance matrix.
 
-With our data properly formatted, we can construct a function to implement the decision rule that recommends any treatment that both reduces the expected number of headache days per month by a minimal clinically important difference (mcid) of 0.5 with respect to placebo (treatment 1) and is within 0.5 expected headache days of the most effective treatment. Evaluating this function before bias adjustment, we discover that treatments 3, 6 and 7, or equivalently amitriptyline, topiramate and propranolol, are within the optimal set. Using 'bat_1D', we can then iteratively assess the effect of bias adjustment on the outcomes of our NMA to determine the estimated bias thresholds at which this optimal set changes.
+With our data properly formatted, we can construct a function to implement the decision rule that recommends any treatment that both reduces the expected number of headache days per month by a minimal clinically important difference (mcid) of 0.5 with respect to placebo (treatment 1) and is within 0.5 expected headache days of the most effective treatment. Evaluating this function before bias adjustment, we discover that treatments 3, 6 and 7, or equivalently amitriptyline, topiramate and propranolol, are within the optimal set. Using `bat_1D`, we can then iteratively assess the effect of bias adjustment on the outcomes of our NMA to determine the estimated bias thresholds at which this optimal set changes.
 
 ```{r}
 
@@ -118,7 +118,7 @@ head_1D <- bat_1D(data, decision_function = head_dec, indices = 1:n, preset = 0,
 
 ```
 
-Using the function 'bat_forest', we can display these estimated thresholds in a forest plot along with the 95\% credible intervals reported by Phillippo et al. (2019) for the posterior means.
+Using the function `bat_forest`, we can display these estimated thresholds in a forest plot along with the 95\% credible intervals reported by Phillippo et al. (2019) for the posterior means.
 
 ```{r, fig.width = 12, fig.height = 3.5, out.width='100%', dpi=300}
 # include CrI estimates and appropriate row labels
@@ -141,7 +141,7 @@ To illustrate the broader applications of our method to economic health technolo
 knitr::include_graphics("CEA Network.png")
 ```
 
-For ease and reproducibility, the individual study data are available in the 'data' folder of the \texttt{nmabat} package under the name 'smk.data.Rda'. Once these data are read in, we can employ the 'pairwise' function from the 'meta' package to reformat our data.
+For ease and reproducibility, the individual study data are available in the 'data' folder of the `nmabat` package under the name `smk.data.Rda`. Once these data are read in, we can employ the `pairwise` function from the `meta` package to reformat our data.
 
 ```{r}
 library(nmabat)
@@ -160,7 +160,7 @@ With our data properly formatted, we can construct a function to implement the d
 $$ NB(k,w,\beta) = \zeta(\beta)_k \cdot g \cdot w - c_k, $$
 with $w$ representing the value that a decision maker is willing to spend to achieve a one unit gain in quality adjusted life years (QALYs), and $g$ representing the number of QALYs gained as a result of smoking cessation. This function depends on the absolute probabilities of smoking cessation, $\zeta(\beta)_k$ for each treatment $k$, defined as
 $$ \text{logit}(\zeta(\beta)_k) = -2.589 + \tilde{\theta}(\beta)_{1k} $$
-where $-2.589$ is the predictive mean for the log odds of smoking cessation under no contact as given by Dias et al. (2018) and $\tilde{\theta}(\beta)_{1k}$ is the estimated log odds ratio of smoking cessation for treatment $k$ as compared to no contact that we obtain from our NMA following bias adjustment by $\beta$. To account for possible heterogeneity in the observed data, the estimates for the log odds ratios of each treatment are obtained from a random-effects NMA, which we use 'netmeta_slim' to implement. 
+where $-2.589$ is the predictive mean for the log odds of smoking cessation under no contact as given by Dias et al. (2018) and $\tilde{\theta}(\beta)_{1k}$ is the estimated log odds ratio of smoking cessation for treatment $k$ as compared to no contact that we obtain from our NMA following bias adjustment by $\beta$. To account for possible heterogeneity in the observed data, the estimates for the log odds ratios of each treatment are obtained from a random-effects NMA, which we use `netmeta_slim` to implement. 
 
 Additionally, the net benefit of each treatment cannot be calculated without $c_k$, the expected cost of each treatment $k$, which are reported by Dias et al. (2018) in British pounds as &#8356;0 for no contact, &#8356;200 for self-help, &#8356;6000 for individual counselling and &#8356;600 for group therapy. Assuming that smoking cessation results in a gain of 15 QALYs and employing the standard willingness to pay value of &#8356;20,000 per QALY gained, we can then substitute $g = 15$, $w = 20000$, $\zeta(\beta)_k$ and $c_k$ to obtain our estimates of net benefit for each treatment $k$, the maximal of which corresponds to the most cost-effective treatment. Before bias adjustment, group counselling is identified by this function as most cost-effective.
 
@@ -201,7 +201,7 @@ CEA_2arm_2D.2 <- bat_2D(data = pw, decision_function = CEA_decision, ind1 = c(23
 
 ```
 
-Using our functions for one-dimensional and two-dimensional bias threshold identification, we obtain bias invariant intervals for each of the 22 2-arm trials, along with select bias invariant regions for simultaneous adjustment, both of which are depicted below. The 95\% confidence intervals for each estimate were constructed by application of the Vysochanskij–Petunin inequality using their estimated standard errors obtained from the 'netmeta_slim' function. Due to the logit link between the relative treatment effects from our NMA and the absolute treatment effects on which the net benefit function is dependent, our decision function is nonlinear in the estimates of our NMA, which is visually evident in the plots depicting two-dimensional bias adjustment. 
+Using our functions for one-dimensional and two-dimensional bias threshold identification, we obtain bias invariant intervals for each of the 22 2-arm trials, along with select bias invariant regions for simultaneous adjustment, both of which are depicted below. The 95\% confidence intervals for each estimate were constructed by application of the Vysochanskij–Petunin inequality using their estimated standard errors obtained from the `netmeta_slim` function. Due to the logit link between the relative treatment effects from our NMA and the absolute treatment effects on which the net benefit function is dependent, our decision function is nonlinear in the estimates of our NMA, which is visually evident in the plots depicting two-dimensional bias adjustment. 
 
 ```{r, fig.width = 14.4, fig.height = 7.7, out.width='100%', dpi=300}
 # Format labels for treatment contrasts
