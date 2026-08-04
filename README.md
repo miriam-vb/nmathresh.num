@@ -12,6 +12,7 @@ You can install the development version of `nmabat` from [GitHub](https://github
 
 ``` r
 # install.packages("pak")
+pkg.build_vignettes = TRUE
 pak::pak("miriam-vb/nmabat")
 ```
 
