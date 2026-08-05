@@ -159,7 +159,7 @@ where $-2.589$ is the predictive mean for the log odds of smoking cessation unde
 
 Additionally, the net benefit of each treatment cannot be calculated without $c_k$, the expected cost of each treatment $k$, which are reported by Dias et al. (2018) in British pounds as &#8356;0 for no contact, &#8356;200 for self-help, &#8356;6000 for individual counselling and &#8356;600 for group therapy. Assuming that smoking cessation results in a gain of 15 QALYs and employing the standard willingness to pay value of &#8356;20,000 per QALY gained, we can then substitute $g = 15$, $w = 20000$, $\zeta(\beta)_k$ and $c_k$ to obtain our estimates of net benefit for each treatment $k$, the maximal of which corresponds to the most cost-effective treatment. Before bias adjustment, group counselling is identified by this function as most cost-effective.
 
-```{r}
+```{r, warning = FALSE}
 # Define the CEA decision function
 CEA_decision <- function(data, bias = rep(0,n)) {
   
@@ -218,7 +218,7 @@ print_bat_2D(CEA_2arm_2D.2, labX = "Bias (Study 19)", labY = "Bias (Study 21)")
 While bias thresholds for adjustment in singular trial contrasts cannot be obtained for a multi-arm study without disrupting the consistency of the network, since adjustment in only one contrast of a multi-arm trial would result in inconsistency between the direct and indirect evidence reported by the trial, thresholds for bias adjustment at the arm level can be obtained even for binomial response data by projection of adjustment at the contrast level within 3-arm studies. To summarize, since each individual treatment arm contributes to the direct evidence for exactly two contrasts comparing it to the remaining treatments, a simultaneous adjustment of both such contrasts in the direction of the selected treatment (negative when the selected treatment is the comparator, positive when it is the alternate treatment) would be equivalent to directly adjusting the log odds of that treatment and would not disrupt consistency of the network. Additional mathematical details pertaining to this projected adjustment can be found in "Interval Bisection Approach to Threshold Analysis for Network Meta-Analysis".
 
 
-```{r}
+```{r, warning = FALSE}
 # Define function for projecting bias to arm-level in multi-arm studies
 n <- 6
 proj_decision <- function(data, bias = rep(0,n)) {
