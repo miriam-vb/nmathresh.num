@@ -146,7 +146,7 @@ library(nmabat)
 
 # Prepare data for input to netmeta_slim
 pw <- meta::pairwise(treat = treatment, event = responders, n = sampleSize,
-                studlab = study, data = smk.data, sm = "OR")
+                studlab = study, data = smk.count, sm = "OR")
 n <- length(pw$TE)
 net_slim <- netmeta_slim(pw)
 ```
