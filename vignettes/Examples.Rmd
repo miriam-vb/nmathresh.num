@@ -25,8 +25,8 @@ Phillippo et al. (2019) generated the posterior summaries for the relative treat
 library(nmabat)
 
 # Read in the posterior summaries
-load("./Headache posterior summaries.Rda")
-load("./Headache posterior covariance.Rda")
+data("post.summary")
+data("post.cov")
 
 # Posterior means of treatment parameters
 post.mean.d <- post.summary$statistics[1:7, "Mean"]
@@ -147,7 +147,7 @@ For ease and reproducibility, the individual study data are available in the 'da
 library(nmabat)
 
 # Read in the individual study data
-load("./smk.data.Rda")
+data("smk.data")
 
 # Prepare data for input to netmeta_slim
 pw <- meta::pairwise(treat = treatment, event = responders, n = sampleSize,
@@ -195,9 +195,9 @@ CEA_decision <- function(data, bias = rep(0,n)) {
 CEA_2arm_1D <- bat_1D(data = pw, decision_function = CEA_decision, indices = 7:n, preset = 0, admin = 10, future_plan = future::plan('multisession'))
 
 # Two-dimensional threshold analysis for 2-arm studies
-CEA_2arm_2D.1 <- bat_2D(data = pw, decision_function = CEA_decision, ind1 = c(10), ind2 = c(26), preset = 0, admin = 10, future_plan = future::plan('multisession', workers = 16), plot = FALSE)
+CEA_2arm_2D.1 <- bat_2D(data = pw, decision_function = CEA_decision, ind1 = c(10), ind2 = c(26), preset = 0, admin = 10, future_plan = future::plan('multisession'), plot = FALSE)
 
-CEA_2arm_2D.2 <- bat_2D(data = pw, decision_function = CEA_decision, ind1 = c(23), ind2 = c(25), preset = 0, admin = 10, future_plan = future::plan('multisession', workers = 16), plot = FALSE)
+CEA_2arm_2D.2 <- bat_2D(data = pw, decision_function = CEA_decision, ind1 = c(23), ind2 = c(25), preset = 0, admin = 10, future_plan = future::plan('multisession'), plot = FALSE)
 
 ```
 

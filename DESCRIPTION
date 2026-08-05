@@ -27,3 +27,6 @@ Suggests:
     rmarkdown
 VignetteBuilder: knitr
 URL: https://github.com/miriam-vb/nmabat
+Depends: 
+    R (>= 3.5)
+LazyData: true
