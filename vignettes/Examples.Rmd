@@ -22,11 +22,8 @@ knitr::include_graphics("Headache Network.png")
 Phillippo et al. (2019) generated the posterior summaries for the relative treatment contrasts using WinBUGS, and these results are available either from the supplementary data accompanying their paper or from the `nmabat` package.
 
 ```{r}
-library(nmabat)
-
 # Read in the posterior summaries
-data("post.summary")
-data("post.cov")
+library(nmabat)
 
 # Posterior means of treatment parameters
 post.mean.d <- post.summary$statistics[1:7, "Mean"]
@@ -144,10 +141,8 @@ knitr::include_graphics("CEA Network.png")
 For ease and reproducibility, the individual study data are available in the 'data' folder of the `nmabat` package under the name `smk.data.Rda`. Once these data are read in, we can employ the `pairwise` function from the `meta` package to reformat our data.
 
 ```{r}
-library(nmabat)
-
 # Read in the individual study data
-data("smk.data")
+library(nmabat)
 
 # Prepare data for input to netmeta_slim
 pw <- meta::pairwise(treat = treatment, event = responders, n = sampleSize,
