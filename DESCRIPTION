@@ -19,7 +19,8 @@ Imports:
     gridExtra,
     ggplot2,
     ggforce,
-    doFuture
+    doFuture,
+    DescTools
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
 Suggests: 
