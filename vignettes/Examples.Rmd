@@ -15,7 +15,7 @@ This vignette provides worked examples for the `nmabat` package, recreating exac
 # Comparison with Analytical Approach
 To compare the techniques of Phillippo et al. and our proposed method, we replicate an example from their 2019 paper illustrating the varying complexity of possible decision rules. The data forming the basis of the analysis are comprised of 11 studies comparing 8 distinct headache treatments: telmisartan, amitriptyline, divalproex sodium, gabapentin, topiramate, propranolol, propranolol-nadolol, and placebo. The outcome under study was the number of headache days per month associated with each treatment. 
 
-```{r, echo=FALSE, out.width='80%', fig.cap="Headache treatment network."}
+```{r, echo=FALSE, out.width='80%', fig.cap="Figure 1: Headache treatment network."}
 knitr::include_graphics("Headache Network.png")
 ```
 
@@ -117,7 +117,7 @@ head_1D <- bat_1D(data, decision_function = head_dec, indices = 1:n, preset = 0,
 
 Using the function `bat_forest`, we can display these estimated thresholds in a forest plot along with the 95\% credible intervals reported by Phillippo et al. (2019) for the posterior means.
 
-```{r, fig.width = 12, fig.height = 3.5, out.width='100%', dpi=300}
+```{r, fig.width = 12, fig.height = 3.5, out.width='100%', dpi=300, fig.cap="Figure 2: Forest plot for bias adjustment under the frequentist framework."}
 # include CrI estimates and appropriate row labels
 CrI.lo <- c(-2.32,-0.99,-1.6,-1.51,-2.20,-1.64,-1.13,-1.11)
 CrI.hi <- c(1.27,1.23,1.58,-0.58,-0.2,0.45,1.32,0.82)
@@ -131,10 +131,51 @@ bat_forest(head_1D, pmean, CrI.lo, CrI.hi, rlab, xlim = c(-3,2), xlab = "Change 
 When the endpoint of the credible interval for a given data point lies beyond the boundary of its bias invariant interval, the portion of the invariant interval corresponding to the associated direction of bias adjustment is plotted in pink, rather than blue. As evidenced by the many pink subintervals illustrated above, the 95\% credible intervals of each treatment contrast exceed their associated bias invariant intervals in at least one direction, with both of the 6 vs. 3 and 7 vs. 6 contrasts having bias invariant intervals that are proper subsets of their credible intervals. This indicates that the recommendation of amitriptyline, topiramate and propranolol as optimal treatments might not be robust to the inherent uncertainty or potential bias in each of our contrast estimates.
 
 
+The approach that Phillippo et al. (2019) take to the problem employs the Bayesian projection matrix $\tilde{H}= (\Sigma_d^{-1}+ X^{\top}WX)^{-1}X^{\top}W$, for which the prior precision matrix $\Sigma_d^{-1}$ now affects the influence of each contrast on the common-effects NMA results. Employing $\tilde{H}$ instead in our implementation of the decision function described above, we obtain the bias thresholds depicted below.
+
+```{r, fig.width = 12, fig.height = 3.5, out.width='100%', dpi=300, fig.cap="Figure 3: Forest plot for bias adjustment under the Bayesian framework."}
+
+head_dec_B <- function(data, bias = rep(0,n)) {
+  # construct the Bayesian projection matrix
+  H <- data$post%*%t(data$X)%*%(solve(data$W))
+  
+  # obtain estimated treatment effects under bias adjustment
+  treatment_est <- H%*%(data$pmean+bias)
+  
+  # determine maximally efficacious treatment
+  if (all(treatment_est > -0.5)) {
+    best <- c(1)
+  } else {
+    best <- c(which.min(treatment_est) + 1)
+  }
+  ref <- best[1]
+  
+  # include all treatments within mcid of ref in the optimal treatment set
+  for (i in 1:length(treatment_est)) {
+    if (treatment_est[i] <= -0.5 && i != ref - 1 &&
+        treatment_est[i] - 0.5 <= treatment_est[ref-1]) {
+      best[length(best)+1] <- i + 1
+    }
+  }
+  
+  # return optimal treatment set
+  return(sort(best))
+}
+
+# Determine the bias adjustment thresholds for each contrast
+head_1D_B <- bat_1D(data, decision_function = head_dec_B, indices = 1:n, preset = 0, admin = 30)
+
+bat_forest(head_1D_B, pmean, CrI.lo, CrI.hi, rlab, xlim = c(-3,2), xlab = "Change in Headache Days per Month", label.title = "Contrast", CI.title = "95% CrI", refline = 0, digits = 2, calcdim = FALSE)
+
+```
+
+Visually, the forest plots of these thresholds seem very similar, but there are a few noticeable differences. In Figure 2, we note that the positive threshold for the 7 vs. 1 contrast is distinctly higher than reported in Figure 3, and further the 4 vs. 1 and 5 vs. 1 contrasts each have no identified bias threshold at the positive administrative cutoff of 30, whereas Figure 3 reports thresholds for these contrasts within the cutoff. These distinctions reflect the differences in the matrices used to project our bias adjustment onto the resultant treatment effects; $\tilde{H}$ has entirely nonzero entries, and thus bias adjustment in any data point will impact each relative effect estimate, whereas $H$ only projects bias adjustment in those contrasts comparing treatments 2, 4, 5, or 8 with 1 onto their associated relative effect estimates, hence bias adjustment in any of these contrasts that worsens an already suboptimal treatment could not possibly change our optimal treatment set. 
+
+
 # Application to Cost-Effectiveness Analysis
 To illustrate the broader applications of our method to economic health technology assessments, we obtain bias thresholds for the following cost-effectiveness analysis on smoking cessation interventions extended from the book "Network Meta-Analysis for Decision Making" by Dias et al. (2018). The data underpinning our analysis are comprised of 24 studies, 2 three-arm and 22 two-arm trials, on four treatments: no contact (which is selected as the reference treatment), self-help, individual counselling and group counselling. Each study records the number of successful smoking cessations at 6-12 months out of the total number of individuals randomized to each trial arm.
 
-```{r, echo=FALSE, out.width='80%', fig.cap="Smoking cessation treatment network."}
+```{r, echo=FALSE, out.width='80%', fig.cap="Figure 4: Smoking cessation treatment network."}
 knitr::include_graphics("CEA Network.png")
 ```
 
@@ -203,7 +244,7 @@ Using our functions for one-dimensional and two-dimensional bias threshold ident
 lkup <- c(A = 1, B = 2, C = 3, D = 4)
 pw$treat2_num <- lkup[pw$treat2]
 pw$treat1_num <- lkup[pw$treat1]
-labs <- paste0(pw$treat2_num, " vs. ", pw$treat1_num, " (", pw$studlab,")")
+labs <- paste0(pw$treat1_num, " vs. ", pw$treat2_num, " (", pw$studlab,")")
 
 # Forest plot for bias adjustment in 2-arm studies
 bat_forest(CEA_2arm_1D, net_slim$TE[7:n], net_slim$TE[7:n]-3*net_slim$seTE[7:n], net_slim$TE[7:n]+3*net_slim$seTE[7:n], labs[7:n], xlim = c(-10,10), y.title = "LOR", xlab = "Log Odds Ratio", label.title = "Contrast (Study)", calcdim = FALSE)
@@ -232,10 +273,10 @@ proj_decision <- function(data, bias = rep(0,n)) {
   
   if (scl_bias != 0) {
     for (i in 1:nrow(data)) {
-      if (data$studlab[i] == study[ind] && data$treat1[i] == mult_trt[ind]) {
+      if (data$studlab[i] == study[ind] && data$treat2[i] == mult_trt[ind]) {
         data$TE[i] <- data$TE[i] - scl_bias
       }
-      if (data$studlab[i] == study[ind] && data$treat2[i] == mult_trt[ind]) {
+      if (data$studlab[i] == study[ind] && data$treat1[i] == mult_trt[ind]) {
         data$TE[i] <- data$TE[i] + scl_bias
       }
     }
